@@ -4,6 +4,17 @@
 
 // Package netbox implements a plugin that retrieves IP lease information
 // from a NetBox server and uses it in the DHCP reply.
+//
+// Example config:
+//
+// server6:
+//   listen: '[::]547'
+//   - example:
+//   - server_id: LL aa:bb:cc:dd:ee:ff
+//   - netbox: https://netbox.coredhcp.io my_api_token
+//
+// This will send requests to https://netbox.coredhcp.io/api/<path> using
+// my_api_token for authentication.
 package netbox
 
 import (
@@ -20,18 +31,11 @@ import (
 
 var log = logger.GetLogger("plugins/netbox")
 
-// Example config:
-//
-// server6:
-//   listen: '[::]547'
-//   - example:
-//   - server_id: LL aa:bb:cc:dd:ee:ff
-//   - netbox: https://netbox.coredhcp.io my_api_token
-//
-// This will send requests to https://netbox.coredhcp.io/api/<path> using
-// my_api_token for authentication.
-func init() {
-	plugins.RegisterPlugin("netbox", setupNetbox6, setupNetbox4)
+// Plugin wraps plugin registration information
+var Plugin = plugins.Plugin{
+	Name:   "netbox",
+	Setup6: setup6,
+	Setup4: setup4,
 }
 
 var netBox *NetBox
@@ -56,7 +60,7 @@ func initNetBox(args ...string) error {
 	return nil
 }
 
-func setupNetbox6(args ...string) (handler.Handler6, error) {
+func setup6(args ...string) (handler.Handler6, error) {
 	if err := initNetBox(args...); err != nil {
 		return nil, err
 	}
@@ -64,7 +68,7 @@ func setupNetbox6(args ...string) (handler.Handler6, error) {
 	return netboxHandler6, nil
 }
 
-func setupNetbox4(args ...string) (handler.Handler4, error) {
+func setup4(args ...string) (handler.Handler4, error) {
 	if err := initNetBox(args...); err != nil {
 		return nil, err
 	}
