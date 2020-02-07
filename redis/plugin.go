@@ -19,15 +19,18 @@ import (
 	"github.com/insomniacslk/dhcp/dhcpv6"
 )
 
+// Plugin wraps plugin registration information
+var Plugin = plugins.Plugin{
+	Name:   "redis",
+	Setup6: setup6,
+	Setup4: setup4,
+}
+
 // various global variables
 var (
 	log  = logger.GetLogger("plugins/redis")
 	pool *redis.Pool
 )
-
-func init() {
-	plugins.RegisterPlugin("redis", setupRedis6, setupRedis4)
-}
 
 // Handler6 handles DHCPv6 packets for the redis plugin
 func Handler6(req, resp dhcpv6.DHCPv6) (dhcpv6.DHCPv6, bool) {
@@ -117,13 +120,13 @@ func Handler4(req, resp *dhcpv4.DHCPv4) (*dhcpv4.DHCPv4, bool) {
 	return resp, false
 }
 
-func setupRedis6(args ...string) (handler.Handler6, error) {
+func setup6(args ...string) (handler.Handler6, error) {
 	// TODO setup function for IPv6
 	log.Warning("not implemented for IPv6")
 	return Handler6, nil
 }
 
-func setupRedis4(args ...string) (handler.Handler4, error) {
+func setup4(args ...string) (handler.Handler4, error) {
 	_, h4, err := setupRedis(false, args...)
 	return h4, err
 }
